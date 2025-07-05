@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        img {
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .task-list {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .task-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .task-list li {
+            background: #e9ecef;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .task-summary {
+            margin-top: 20px;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome, {{ employee.name }}</h2>
+        <p><strong>Email:</strong> {{ employee.email }}</p>
+        <p><strong>Position:</strong> {{ employee.position }}</p>
+        <p><strong>Department:</strong> {{ employee.department }}</p>
+        <p><strong>Phone:</strong> {{ employee.phone_number }}</p>
+        <p><strong>Date Joined:</strong> {{ employee.date_joined }}</p>
+        <img src="{{ employee.image.url }}" alt="Employee Image" width="150">
+
+        <div class="task-summary">
+            <h3>Task Summary</h3>
+            <p><strong>Total Tasks:</strong> {{ tasks_count }}</p>
+            <p><strong>Completed Tasks:</strong> {{ completed_tasks_count }}</p>
+            <p><strong>Pending Tasks:</strong> {{ pending_tasks_count }}</p>
+        </div>
+
+        <div class="task-list">
+            <h3>Your Tasks</h3>
+            <ul>
+                {% for task in tasks %}
+                    <li class="{% if task.status == 'Completed' %}completed{% else %}pending{% endif %}">
+                        <strong>{{ task.name }}</strong> - Deadline: {{ task.deadline }}
+                        {% if task.status == 'Completed' %} ✅{% else %} ❌{% endif %}
+                    </li>
+                {% empty %}
+                    <li>No tasks assigned.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="{% url 'employee_logout' %}">Logout</a>
+    </div>
+</body>
+</html>

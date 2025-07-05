@@ -1,0 +1,265 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Bizzfly Pvt. Ltd.</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+        }
+        /* Navbar */
+        .navbar {
+            height: 72px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #212529;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            margin-right: 40px;
+        }
+        .navbar-nav .nav-item .nav-link {
+            font-size: 1.1rem;
+            color: white;
+            padding: 15px;
+        }
+        .navbar-nav .nav-item .nav-link:hover {
+            color: white;
+            background-color: #007bff;
+        }
+
+        .footer {
+            background: #212529; /* Dark Theme */
+            color: #ffffff;
+            font-size: 0.9rem;
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .footer-link {
+            color: #f8f9fa;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footer-link:hover {
+            text-decoration: underline;
+            color: #0d6efd; /* Bootstrap Primary Blue */
+        }
+        .dropdown{
+            color: white;
+        }
+        .notification-container {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
+            width: 300px;
+            padding: 10px;
+            z-index: 1000;
+        }
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3)), 
+                        url('https://source.unsplash.com/1600x900/?business,corporate') no-repeat center center/cover;
+            padding: 100px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        .hero-section h1 {
+            font-size: 45px;
+            font-weight: bold;
+            text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.7);
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        /* Content Section */
+        .content-section {
+            padding: 50px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: -40px;
+            position: relative;
+            z-index: 10;
+        }
+        .section-title {
+            font-size: 30px;
+            font-weight: bold;
+            color: #007bff;
+            border-left: 5px solid #007bff;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+        /* Icon Boxes */
+        .icon-box {
+            text-align: center;
+            padding: 25px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .icon-box:hover {
+            transform: scale(1.05);
+        }
+        .icon-box i {
+            font-size: 50px;
+            color: #007bff;
+            transition: color 0.3s ease-in-out;
+        }
+        .icon-box:hover i {
+            color: #0056b3;
+        }
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'images/emp_panel.png' %}" alt="Task Scheduler" style="height: 40px; margin-right: 10px;">
+                Task Scheduler
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employee_dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'our_employee' %}">Our Employees</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about_us' %}">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employee_logout' %}">Log out</a>
+                    </li>
+                    <li class="nav-item">
+                        <!-- Notification Icon -->
+                        <a href="javascript:void(0);" id="notification-icon">
+                            <img src="{% static 'images/notification1.jpg' %}" alt="Notifications" height="20px" width="25px" style="margin-top:20px; margin-left: 10px; color: rgb(104, 97, 97);">
+                        </a>
+                    </li>
+                    
+                    <!-- Notifications container -->
+                    <div id="notification-container" class="notification-container">
+                        {% for interval in notifications %}
+                            <div class="notification-header">{{ interval.interval }} ({{ interval.count }} notifications)</div>
+                            {% for notification in interval.notifications %}
+                                <div class="notification-item">
+                                    <p>{{ notification.message }}</p>
+                                    <small>{{ notification.created_at }}</small>
+                                </div>
+                            {% endfor %}
+                        {% empty %}
+                            <p>No notifications</p>
+                        {% endfor %}
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="display-4 fw-bold">Welcome to Bizzfly Pvt. Ltd.</h1>
+    </div>
+
+    <div class="container">
+        <div class="content-section">
+            <h2 class="text-primary border-start border-5 ps-3">Who We Are</h2>
+            <p>We assure you to give best innovative, creative solutions for digital marketing & web development. Our focus is on results-oriented marketing in the digital world.</p>
+            
+            <h2 class="text-primary border-start border-5 ps-3">Our Mission</h2>
+            <p>We strive to maintain a balance between innovation, creativity, flexibility, and affordability, aiming to bring SEO and SMM solutions worldwide.</p>
+            
+            <h2 class="text-primary border-start border-5 ps-3">Core Values</h2>
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="card shadow-sm p-4">
+                        <i class="fas fa-lightbulb"></i>
+                        <h5 class="mt-3">Innovation</h5>
+                        <p>We believe in constant innovation to improve efficiency.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm p-4">
+                        <i class="fas fa-users"></i>
+                        <h5 class="mt-3">Collaboration</h5>
+                        <p>Teamwork is at the core of everything we do.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm p-4">
+                        <i class="fas fa-handshake"></i>
+                        <h5 class="mt-3">Integrity</h5>
+                        <p>We uphold honesty and transparency in all operations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="text-primary border-start border-5 ps-3 mt-4">Get in Touch</h2>
+            <p><b>📍 Address:</b> C3/12 Dhankwadi, Pune, India</p>
+            <p><b>📧 Email:</b> info@bizzfly.com</p>
+            <p><b>📞 Contact:</b> +91-7502211337 / +91-9107223377</p>
+        </div>
+    </div>
+
+    <footer class="footer bg-dark text-white py-3">
+        <div class="container text-center">
+            <p class="mb-1">&copy; 2025 Task Scheduler. All Rights Reserved.</p>
+            <p class="mb-0">
+                Designed by 
+                <a href="https://www.linkedin.com/in/tejas-shinde-7aa967338/" target="_blank" class="footer-link">
+                   Tejas Shinde
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        function fetchNotifications() {
+            fetch('/get_notifications/')
+                .then(response => response.json())
+                .then(data => {
+                    let notificationIcon = document.getElementById('notification-count');
+                    let notificationDropdown = document.getElementById('notification-dropdown');
+
+                    notificationIcon.innerText = data.count > 0 ? data.count : '';
+                    notificationDropdown.innerHTML = '';
+
+                    if (data.notifications.length > 0) {
+                        data.notifications.forEach(notif => {
+                            let listItem = `<li><a class="dropdown-item" href="#">${notif.message} (${notif.created_at})</a></li>`;
+                            notificationDropdown.innerHTML += listItem;
+                        });
+                    } else {
+                        notificationDropdown.innerHTML = '<li><a class="dropdown-item" href="#">No new notifications</a></li>';
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

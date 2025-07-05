@@ -1,0 +1,242 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url("{% static 'images/background_admin.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            padding-top: 100px;
+        }
+        .search-box {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .search-box input {
+            width: 50%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .employee-card {
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            background: #fff;
+            color: #333;
+            overflow: hidden;
+            font-weight: 600;
+        }
+        .employee-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        .navbar {
+            height: 72px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #212529;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            margin-right: 40px;
+        }
+        .navbar-nav .nav-item .nav-link {
+            font-size: 1.1rem;
+            color: white;
+            padding: 15px;
+        }
+        .navbar-nav .nav-item .nav-link:hover {
+            color: white;
+            background-color: #007bff;
+        }
+        .dropdown{
+            color: white;
+        }
+        .card img {
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            height: 300px; 
+            width: 100%; 
+            object-fit: cover; 
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .employee-card:hover img {
+            transform: scale(1.08);
+        }
+        .card-body {
+            text-align: center;
+            padding: 20px;
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #ff7eb3, #ff758c);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: bold;
+            transition: background 0.3s;
+            color: white;
+        }
+        .btn-custom:hover {
+            background: linear-gradient(45deg, #ff5a92, #ff3c78);
+        }
+        .notification-container {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
+            width: 300px;
+            padding: 10px;
+            z-index: 1000;
+        }
+        .footer {
+            background: #212529; /* Dark Theme */
+            color: #ffffff;
+            font-size: 0.9rem;
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .footer-link {
+            color: #f8f9fa;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footer-link:hover {
+            text-decoration: underline;
+            color: #0d6efd; /* Bootstrap Primary Blue */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'images/emp_panel.png' %}" alt="Task Scheduler" style="height: 40px; margin-right: 10px;">
+                Task Scheduler
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employee_dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'our_employee' %}">Our Employees</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about_us' %}">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employee_logout' %}">Log out</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="javascript:void(0);" id="notification-icon">
+                            <img src="{% static 'images/notification1.jpg' %}" alt="Notifications" height="20px" width="25px" style="margin-top:20px; margin-left: 10px; color: rgb(104, 97, 97);">
+                        </a>
+                    </li>
+                    <div id="notification-container" class="notification-container">
+                        {% for interval in notifications %}
+                            <div class="notification-header">{{ interval.interval }} ({{ interval.count }} notifications)</div>
+                            {% for notification in interval.notifications %}
+                                <div class="notification-item">
+                                    <p>{{ notification.message }}</p>
+                                    <small>{{ notification.created_at }}</small>
+                                </div>
+                            {% endfor %}
+                        {% empty %}
+                            <p>No notifications</p>
+                        {% endfor %}
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h2 class="text-center mb-4">Meet Our Amazing Team</h2>
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Search employees...">
+        </div>
+        <div class="row" id="employee_list">
+            {% for employee in employees %}
+            <div class="col-md-4 mb-4 employee-item">
+                <div class="card employee-card">
+                    <img src="{{ employee.image.url }}" alt="{{ employee.name }}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    <div class="card-body">
+                        <h4 class="card-title">{{ employee.name }}</h4>
+                        <p class="card-text"><strong>Position:</strong> {{ employee.position }}</p>
+                        <p class="card-text"><strong>Email:</strong> {{ employee.email }}</p>
+                        <p class="card-text"><strong>Phone:</strong> {{ employee.phone_number }}</p>
+                        <!-- <a href="{% url 'our_employee' employee.id %}" class="btn btn-custom w-100">View Details</a> -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <footer class="footer bg-dark text-white py-3">
+        <div class="container text-center">
+            <p class="mb-1">&copy; 2025 Task Scheduler. All Rights Reserved.</p>
+            <p class="mb-0">
+               
+                <a href="https://www.linkedin.com/in/narendra-gaikwad-907864218/" target="_blank" class="footer-link">
+                    
+                </a>
+            </p>
+        </div>
+    </footer>
+    <script>
+        document.getElementById('search').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let employees = document.querySelectorAll('.employee-item');
+            
+            employees.forEach(function(employee) {
+                let name = employee.querySelector('.card-title').textContent.toLowerCase();
+                if (name.includes(filter)) {
+                    employee.style.display = "block";
+                } else {
+                    employee.style.display = "none";
+                }
+            });
+        });
+
+        function fetchNotifications() {
+            fetch('/get_notifications/')
+                .then(response => response.json())
+                .then(data => {
+                    let notificationIcon = document.getElementById('notification-count');
+                    let notificationDropdown = document.getElementById('notification-dropdown');
+
+                    notificationIcon.innerText = data.count > 0 ? data.count : '';
+                    notificationDropdown.innerHTML = '';
+
+                    if (data.notifications.length > 0) {
+                        data.notifications.forEach(notif => {
+                            let listItem = `<li><a class="dropdown-item" href="#">${notif.message} (${notif.created_at})</a></li>`;
+                            notificationDropdown.innerHTML += listItem;
+                        });
+                    } else {
+                        notificationDropdown.innerHTML = '<li><a class="dropdown-item" href="#">No new notifications</a></li>';
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

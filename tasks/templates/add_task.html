@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Task - AI Task Scheduler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fb;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background: #343a40;
+        }
+
+        .navbar a {
+            color: white !important;
+            transition: color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            color: #ffc107 !important;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #4B0082, #00CED1);
+            color: white;
+            height: 100vh;
+            padding: 10px 10px;
+            position: fixed;
+            width: 260px;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar h5 {
+            color: #ffc107;
+            font-weight: 700;
+            font-size: 1.6rem;
+            text-align: center;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 20px; 
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 193, 7, 0.8);
+            color: #343a40;
+            transform: scale(1.05);
+        }
+
+        .sidebar a.active {
+            background-color: #ffc107;
+            color: #343a40;
+            font-weight: 600;
+        }
+
+        /* Improved Logout Button */
+        .sidebar a:last-child {
+            margin-top: auto;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        .sidebar a:last-child:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .form-control, .form-select, .form-check-input {
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+            padding: 0.5rem 2rem;
+            border-radius: 50px;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3, #004092);
+            transform: scale(1.05);
+        }
+
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 1rem 0;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .footer p {
+            font-size: 0.9rem;
+        }
+
+        .header-container {
+            text-align: center;
+            background-color: #1a73e8;
+            color: white;
+            padding: 50px 0;
+            border-radius: 10px;
+        }
+
+        .header-container h1 {
+            font-size: 2.5rem;
+        }
+
+        .header-container p {
+            font-size: 1.2rem;
+        }
+
+        .task-form-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messageModalLabel">Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript to Show Modal -->
+    {% if messages %}
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var messages = [
+                    {% for message in messages %}
+                        "{{ message }}",
+                    {% endfor %}
+                ];
+                
+                if (messages.length > 0) {
+                    document.getElementById("modalMessage").innerText = messages.join("\n");
+                    var messageModal = new bootstrap.Modal(document.getElementById("messageModal"));
+                    messageModal.show();
+                }
+            });
+        </script>
+    {% endif %}
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <h5>Task Scheduler</h5>
+                <a href="/home"><i class="fas fa-home"></i><span> Home</span></a>
+                <a href="/add-task"><i class="fas fa-plus"></i><span> Add Task</span></a>
+                <a href="/add-employee"><i class="fas fa-user-plus"></i><span> Add Employee</span></a>
+                <a href="/view-schedule"><i class="fas fa-calendar-alt"></i><span> View Schedule</span></a>
+                <a href="/analytics"><i class="fas fa-chart-line"></i><span> Analytics</span></a>
+                <a href="/download-pdf"><i class="fas fa-file-pdf"></i><span> Download Tasks PDF</span></a>
+                {% comment %} <a href="/settings" class="settings-link">
+                    <i class="fas fa-cogs"></i><span> Settings</span>
+                </a> {% endcomment %}
+                <a href="/logout_user"><i class="fas fa-sign-out-alt"></i><span> Log out</span></a>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <header class="header-container">
+                    <h1>➕ Add New Task</h1>
+                </header>
+
+                <div class="task-form-container mt-5">
+                    <form action="/add-task" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-4"> 
+                            <label for="name" class="form-label">Task Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required placeholder="Enter task name">
+                        </div>
+                        <div class="mb-4">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                <option value="" disabled selected>Select Priority</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="deadline" class="form-label">Deadline</label>
+                            <input type="date" class="form-control" id="deadline" name="deadline" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="employee" class="form-label">Assign to Employee</label>
+                            <select class="form-select" id="employee" name="employee" required>
+                                <option value="" disabled selected>Select Employee</option>
+                                {% for employee in employees %}
+                                    <option value="{{ employee.id }}">{{ employee.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% comment %} <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="recurring" name="recurring">
+                            <label class="form-check-label" for="recurring">Recurring Task</label>
+                        </div> {% endcomment %}
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="Add any additional notes or instructions"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="pdf_file" class="form-label">Upload PDF</label>
+                            <input type="file" class="form-control" id="pdf_file" name="pdf_file" accept=".pdf">
+                        </div>
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="submit" class="btn btn-primary px-5 py-2 shadow-lg fw-bold rounded-pill d-flex align-items-center gap-2"
+                                style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; transition: all 0.3s ease-in-out;">
+                                <i class="fas fa-plus-circle"></i> Add Task
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    {% comment %} {% if messages %}
+        <script>
+            {% for message in messages %}
+                Swal.fire({
+                    title: "{% if message.tags == 'success' %}Success{% else %}Error{% endif %}",
+                    text: "{{ message|escapejs }}",
+                    icon: "{% if message.tags == 'success' %}success{% else %}error{% endif %}",
+                    confirmButtonText: "OK"
+                });
+            {% endfor %}
+        </script>
+    {% endif %} {% endcomment %}
+
+</body>
+</html>

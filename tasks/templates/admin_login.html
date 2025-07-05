@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url("{% static 'images/background1.jpg' %}") no-repeat center center/cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            max-width: 420px;
+            width: 100%;
+            backdrop-filter: blur(12px);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            border: 1px solid #6a11cb;
+            padding: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #2575fc;
+            box-shadow: 0 0 8px rgba(39, 117, 252, 0.6);
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+        }
+
+        .additional-links {
+            margin-top: 1rem;
+        }
+
+        .additional-links a {
+            color: #4b0082;
+            font-weight: bold;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .additional-links a:hover {
+            color: #2575fc;
+        }
+    </style>
+</head>
+<body>
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    {% comment %} <h5 class="modal-title" id="messageModalLabel">Notification</h5> {% endcomment %}
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript to Show Modal -->
+    {% if messages %}
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var messages = [
+                    {% for message in messages %}
+                        "{{ message }}",
+                    {% endfor %}
+                ];
+                
+                if (messages.length > 0) {
+                    document.getElementById("modalMessage").innerText = messages.join("\n");
+                    var messageModal = new bootstrap.Modal(document.getElementById("messageModal"));
+                    messageModal.show();
+                }
+            });
+        </script>
+    {% endif %}
+    
+    <div class="login-card">
+        <h2>Admin Login</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-custom w-50">Login</button>
+        </form>
+        <div class="additional-links mt-3">
+            {% comment %} <p>Don't have an account? <a href="{% url 'register_user' %}">Register</a></p> {% endcomment %}
+            <a href="{% url 'employee_login' %}" class="btn btn-warning">Go Back</a>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

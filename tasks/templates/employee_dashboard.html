@@ -1,0 +1,469 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Task Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/fevicon.png' %}">
+    <style>
+        body {
+            padding-top: 56px;
+            background-color: #f4f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .table td,th {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table td:first-child {
+            margin-left: 20px;
+        }
+
+        .footer {
+            background: #212529; /* Dark Theme */
+            color: #ffffff;
+            font-size: 0.9rem;
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .footer-link {
+            color: #f8f9fa;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footer-link:hover {
+            text-decoration: underline;
+            color: #0d6efd; /* Bootstrap Primary Blue */
+        }
+
+        .navbar {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #212529;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            margin-right: 40px;
+            
+        }
+
+        .navbar-nav .nav-item .nav-link {
+            font-size: 1.1rem;
+            color: white;
+            padding: 15px;
+        }
+
+        .navbar-nav .nav-item .nav-link:hover {
+            color: white;
+            background-color: #007bff;
+        }
+        .dropdown{
+            color: white;
+        }
+
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+
+        .task-card {
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .task-card-header {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .task-card-body {
+            padding: 20px;
+        }
+
+        .badge {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+
+        .notification-container {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
+            width: 300px;
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #2ce0f8;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-button img {
+            width: 40px;
+            height: 40px;
+        }
+    
+    </style>
+</head>
+
+<body>
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    {% comment %} <h5 class="modal-title" id="messageModalLabel">Notification</h5> {% endcomment %}
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript to Show Modal -->
+    {% if messages %}
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var messages = [
+                    {% for message in messages %}
+                        "{{ message }}",
+                    {% endfor %}
+                ];
+                
+                if (messages.length > 0) {
+                    document.getElementById("modalMessage").innerText = messages.join("\n");
+                    var messageModal = new bootstrap.Modal(document.getElementById("messageModal"));
+                    messageModal.show();
+                }
+            });
+        </script>
+    {% endif %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'images/emp_panel.png' %}" alt="Task Scheduler" style="height: 40px; margin-right: 10px;">
+                Task Scheduler
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'our_employee' %}">Our Employees</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about_us' %}">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employee_logout' %}">Log out</a>
+                    </li>
+                    <li class="nav-item">
+                        <!-- Notification Icon -->
+                        <a href="javascript:void(0);" id="notification-icon">
+                            <img src="{% static 'images/notification1.jpg' %}" alt="Notifications" height="20px" width="25px" style="margin-top:20px; margin-left: 10px; color: rgb(104, 97, 97);">
+                        </a>
+                    </li>
+                    
+                    <!-- Notifications container -->
+                    <div id="notification-container" class="notification-container">
+                        {% for interval in notifications %}
+                            <div class="notification-header">{{ interval.interval }} ({{ interval.count }} notifications)</div>
+                            {% for notification in interval.notifications %}
+                                <div class="notification-item">
+                                    <p>{{ notification.message }}</p>
+                                    <small>{{ notification.created_at }}</small>
+                                </div>
+                            {% endfor %}
+                        {% empty %}
+                            <p>No notifications</p>
+                        {% endfor %}
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        {% for task in tasks %}
+            {% if  forloop.first %}
+                <div class="welcome-container text-center mb-4">
+                    <h2 class="fw-bold text-primary">Welcome, {{ tasks.0.assigned_employee.name }} 👋</h2>
+                </div>
+            {% endif %}
+        {% endfor %}
+        <!-- Task Status Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-4">
+                <div class="card task-card shadow-lg border-0 rounded-3" style="background-color: #28a745; color: #fff;">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-3x mb-2"></i>
+                        <h5 class="card-title">Completed Tasks</h5>
+                        <p class="card-text">Total completed <strong>{{ completed_tasks.count }}</strong> tasks.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card task-card shadow-lg border-0 rounded-3" style="background-color: #ffc107; color: #212529;">
+                    <div class="card-body text-center">
+                        <i class="fas fa-hourglass-half fa-3x mb-2"></i>
+                        <h5 class="card-title">Pending Tasks</h5>
+                        <p class="card-text">Total <strong>{{ pending_tasks.count }}</strong> pending tasks.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card task-card shadow-lg border-0 rounded-3" style="background-color: #17a2b8; color: #fff;">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tasks fa-3x mb-2"></i>
+                        <h5 class="card-title">Total Tasks</h5>
+                        <p class="card-text"><strong>Total {{ tasks.count }}</strong> tasks</p>
+                    </div>
+                </div>
+            </div>
+        </div>       
+        <input type="text" id="searchEmployee" class="form-control mb-4" placeholder="Search task by task name" onkeyup="filterTable()">
+        <!-- Task List Table -->
+       <div class="card shadow-lg rounded-3">
+            <div class="card-header bg-gradient bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-tasks"></i> My Tasks</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="taskTable">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th>#</th>
+                                <th>Task Name</th>
+                                <th>Status</th>
+                                {% comment %} <th>Assigned Employee</th> {% endcomment %}
+                                <th>Deadline</th>
+                                <th>Description</th>
+                                <th>Update Status</th>
+                                <th>PDF</th>
+                                {% comment %} <th>Action</th>     {% endcomment %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                            <tr>
+                                <td class="text-center fw-bold">{{ forloop.counter }}</td>
+                                <td class="task-name fw-bold">{{ task.name }}</td>
+                                <td class="text-center">
+                                    {% if task.status == 'Completed' %}
+                                    <span class="badge bg-success px-3 py-2">{{ task.status }}</span>
+                                    {% else %}
+                                    <span class="badge bg-warning px-3 py-2 text-dark">{{ task.status }}</span>
+                                    {% endif %}
+                                {% comment %} </td>
+                                <td class="text-center">{{ task.assigned_employee.name }}</td> {% endcomment %}
+                                <td class="text-center text-danger fw-semibold">{{ task.deadline }}</td>
+                                <td class="text-truncate" style="max-width: 150px; cursor: pointer;" title="Click to view full description" onclick="showFullDescription(this, '{{ task.notes|default:"N/A" }}')">{{ task.notes|default:"N/A" }}</td>
+                                <td class="text-center">
+                                    <form action="{% url 'update_task_status' task.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <div class="d-flex justify-content-center">
+                                            <select name="status" class="form-select form-select-sm me-2" style="width: 130px;">
+                                                <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                                <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td class="text-center">
+                                    {% if task.pdf_file %}
+                                        <a href="{{ task.pdf_file.url }}" class="btn btn-sm btn-secondary" download>
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">No PDF</span>
+                                    {% endif %}
+                                </td>
+                                {% comment %} <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteTask({{ task.id }})">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </td> {% endcomment %}
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-3">No tasks available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white py-3">
+        <div class="container text-center">
+            <p class="mb-1">&copy; 2025 Task Scheduler. All Rights Reserved.</p>
+           
+        </div>
+    </footer>
+
+    <!-- Chat Button
+    <div class="chat-button">
+        <a href="{% url 'chat_page' %}">
+            <img src="{% static 'images/chat.png' %}" alt="Chat with Us">
+        </a>
+    </div> -->
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function fetchNotifications() {
+            fetch('/get_notifications/')
+                .then(response => response.json())
+                .then(data => {
+                    let notificationIcon = document.getElementById('notification-count');
+                    let notificationDropdown = document.getElementById('notification-dropdown');
+
+                    notificationIcon.innerText = data.count > 0 ? data.count : '';
+                    notificationDropdown.innerHTML = '';
+
+                    if (data.notifications.length > 0) {
+                        data.notifications.forEach(notif => {
+                            let listItem = `<li><a class="dropdown-item" href="#">${notif.message} (${notif.created_at})</a></li>`;
+                            notificationDropdown.innerHTML += listItem;
+                        });
+                    } else {
+                        notificationDropdown.innerHTML = '<li><a class="dropdown-item" href="#">No new notifications</a></li>';
+                    }
+                });
+        }
+        
+
+        function filterTable() {
+            let input = document.getElementById("searchEmployee").value.toLowerCase();
+            let table = document.getElementById("taskTable");
+            let rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) {
+                let employeeTd = rows[i].getElementsByClassName("employee-name")[0];
+                let taskTd = rows[i].getElementsByClassName("task-name")[0];
+                
+                let employeeText = employeeTd ? employeeTd.textContent || employeeTd.innerText : "";
+                let taskText = taskTd ? taskTd.textContent || taskTd.innerText : "";
+
+                if (employeeText.toLowerCase().includes(input) || taskText.toLowerCase().includes(input)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        function deleteTask(taskId) {
+            if (confirm("Are you sure you want to delete this task?")) {
+                fetch(`/delete_task/${taskId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert("Error deleting task");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        document.getElementById('notification-icon').addEventListener('click', function() {
+            var container = document.getElementById('notification-container');
+            container.style.display = container.style.display === 'none' || container.style.display === '' ? 'block' : 'none';
+        });
+        setInterval(fetchNotifications, 30000);
+        document.addEventListener("DOMContentLoaded", fetchNotifications);
+
+        function showFullDescription(element, description) {
+            alert(description);
+        }
+    </script>
+</body>
+</html>
